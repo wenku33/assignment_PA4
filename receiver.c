@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 
                 if (compute_checksum(d_pkt->data, d_pkt->data_size) != d_pkt->checksum) {
                     printf("Corrupted packet\n");
-                    // make sender resend
+                    // make sender resend?? Drop for now!
                     continue;
                 }
 
@@ -133,6 +133,30 @@ int main(int argc, char *argv[]) {
 
                 }
 
+            } else if (type == 4) { // End packet
+                int retransmissioned = 0;
+                end_packet_t *e_pkt = (end_packet_t *)buffer;
+                int file_id = e_pkt->file_id;
+                if (state[file_id].done) continue;
+                for (int i = 0; i < state[file_id].total_chunks; i++) {
+                    if (state[file_id].chunks[i] == NULL) {
+                        printf("Missing chunk %d, requesting\n", i);
+                        request_retrans(m, file_id, i);
+                        retransmissioned = 1;
+                        usleep(1000);
+                    }
+                }
+
+                if (!retransmissioned) {
+                    state[file_id].done = 1;
+                } else {
+                    // Send end packet
+                    retrans_recvd_packet_t retrans_pkt;
+                    retrans_pkt.packet_type = 5;
+                    retrans_pkt.file_id = file_id;
+                    multicast_send(m, &retrans_pkt, sizeof(retrans_recvd_packet_t));
+                }
+                
             }
         }
     }
