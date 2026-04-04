@@ -125,15 +125,14 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-c") == 0) {
             if (i + 1 >= argc) {
-                printf("Error: -c requires a value\n");
+                printf("Error\n");
                 return 1;
             }
 
             chunk_size = atoi(argv[++i]);
             if (chunk_size <= 0 ||
                 chunk_size > (MAX_PACKET_SIZE - (int)sizeof(data_packet_t))) {
-                printf("Error: invalid chunk size. Max allowed is %d\n",
-                       MAX_PACKET_SIZE - (int)sizeof(data_packet_t));
+                printf("Error: invalid chunk size. Max allowed is %d\n", MAX_PACKET_SIZE - (int)sizeof(data_packet_t));
                 return 1;
             }
         } else {
@@ -142,7 +141,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (file_count == 0) {
-        printf("Usage: %s [-c chunk_size] <file1> <file2> ...\n", argv[0]);
+        printf("Invalid Input");
         return 1;
     }
 
